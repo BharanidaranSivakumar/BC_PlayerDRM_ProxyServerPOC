@@ -4,6 +4,26 @@ const promise = require('promise');
 let bc_tokengenerator = require('./bc_tokengenerator');
 const BC_PLAYBACKRIGHTS_BASEURL = 'https://playback-rights.api.brightcove.com/v1/accounts/';
 const BC_CMSAPI_BASEURL = 'https://cms.api.brightcove.com/v1/accounts/';
+const IPLOC_FINDER_URL = 'https://tools.keycdn.com/geo.json?host=';
+
+let getCurrentLocation = (ipaddress) => {
+    return new promise((resolve, reject) => {
+        method = 'GET'
+        url = IPLOC_FINDER_URL + ipaddress
+        headers = ''
+        body = ''
+        restapi.callRestAPI(method, url, headers, body).then(response => {
+            var currentzip
+            var loc = JSON.parse(response.body);
+            currentzip = loc.data.geo['postal_code']
+            console.log("\nCurrent zip code: " + currentzip+"\n");
+            return resolve(currentzip);
+        }).catch(error => {
+            return reject("Zip not resolved");
+        })
+
+    })
+}
 
 let getPlaybackRights = (videoId, accountId) => {
     return new promise((resolve, reject) => {
@@ -99,8 +119,7 @@ let timerestrictioncheck = (rights) => {
                     status = false
                 }
             }
-        }
-        if (status == true) {
+        }if (status == true) {
             console.log("\Time restriction check status: true\n")
             return resolve(true);
         } else {
@@ -110,4 +129,4 @@ let timerestrictioncheck = (rights) => {
     })
 }
 
-module.exports = { getPlaybackRights, midstreamCheck }
+module.exports = { getCurrentLocation, getPlaybackRights, midstreamCheck }
